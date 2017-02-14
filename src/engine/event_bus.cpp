@@ -5,13 +5,13 @@ using namespace h9;
 EventBus::EventBus()
     : m_mode(Mode::kSimulation), m_time(min_date_time) {}
 
-bool is_market_event(Event::Type type)
+inline bool is_market_event(Event::Type type)
 {
   return type == Event::Type::kAsk || type == Event::Type::kBid ||
          type == Event::Type::kTrade || type == Event::Type::kQuote;
 }
 
-const Event::Pointer &EventBus::dequeue() const
+Event::Pointer EventBus::dequeue()
 {
   if (m_mode == Mode::kRealtime)
   {
@@ -20,8 +20,8 @@ const Event::Pointer &EventBus::dequeue() const
       // 1. check timer
       if (!m_timer_queue.empty())
       {
-        auto &reminder = m_timer_queue.top();
-        if (reminder->time() < m_time)
+        auto reminder = m_timer_queue.top();
+        if (reminder->time() < time())
         {
           m_timer_queue.pop();
           return reminder;
@@ -30,7 +30,7 @@ const Event::Pointer &EventBus::dequeue() const
       // 2. check has event
       if (!m_queue.empty())
       {
-        aut &event = m_queue.top();
+        auto event = m_queue.top();
         m_queue.pop();
         return event;
       }
@@ -44,7 +44,7 @@ const Event::Pointer &EventBus::dequeue() const
     {
       // 1.update local time
       auto event = m_queue.empty() ? nullptr : m_queue.top();
-      if (!event && is_market_event(event->type()))
+      if (event && is_market_event(event->type()))
       {
         if (event->time() < m_time)
         {
@@ -58,9 +58,9 @@ const Event::Pointer &EventBus::dequeue() const
         }
       }
       // 2. check timer
-      if (!m_timer_queue.empty() && !event)
+      if (!m_timer_queue.empty() && event)
       {
-        auto &reminder = m_timer_queue.top();
+        auto reminder = m_timer_queue.top();
         if (reminder->time() < event->time())
         {
           m_timer_queue.pop();
@@ -68,7 +68,7 @@ const Event::Pointer &EventBus::dequeue() const
         }
       }
       // 3.
-      if (!event)
+      if (event)
         m_queue.pop();
       return event;
     }

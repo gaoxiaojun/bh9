@@ -7,6 +7,7 @@
 
 #include <boost/date_time.hpp>
 #include <boost/noncopyable.hpp>
+#include <queue>
 
 namespace h9
 {
@@ -38,6 +39,7 @@ struct deref_less
 
 template <typename T>
 using min_priority_queue = std::priority_queue<T, std::vector<T>, deref_greater<T>>;
+
 
 } // namespace h9
 

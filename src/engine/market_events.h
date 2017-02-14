@@ -15,7 +15,8 @@ class EMarketData : public Event
         : Event(type, time), m_pid(pid), m_iid(iid)
     {
     }
-
+    ProviderId provider_id() const { return m_pid; }
+    InstrumentId instrument_id() const { return m_iid;}
   private:
     ProviderId m_pid;
     InstrumentId m_iid;
@@ -27,11 +28,12 @@ class ETick : public EMarketData
         : EMarketData(type, time, pid, iid), m_price(price), m_vol(vol)
     {
     }
-
+    double price() const noexcept { return m_price;}
+    double volume() const noexcept { return m_vol; }
   private:
     double m_price;
     double m_vol;
-}
+};
 
 class EAsk : public ETick
 {
@@ -40,7 +42,7 @@ class EAsk : public ETick
         : ETick(Event::Type::kAsk, time, pid, iid, price, vol)
     {
     }
-}
+};
 
 class EBid : public ETick
 {
@@ -49,7 +51,7 @@ class EBid : public ETick
         : ETick(Event::Type::kBid, time, pid, iid, price, vol)
     {
     }
-}
+};
 
 class ETrade : public ETick
 {
@@ -58,7 +60,7 @@ class ETrade : public ETick
         : ETick(Event::Type::kTrade, time, pid, iid, price, vol)
     {
     }
-}
+};
 
 class EQuote : public EMarketData
 {
@@ -73,9 +75,9 @@ class EQuote : public EMarketData
     double m_askvol;
     double m_bidprice;
     double m_bidvol;
-}
+};
 
-class ENews : public Event
+class ENews : public EMarketData
 {
   public:
     ENews(ptime time, ProviderId pid, InstrumentId iid, int urgency, std::string url, std::string headline, std::string text)
@@ -86,9 +88,9 @@ class ENews : public Event
   private:
     int m_urgency;
     std::string m_url;
-    std::string mheadline;
+    std::string m_headline;
     std::string m_text;
-}
+};
 
 enum Level2Side {
     Bid,
@@ -114,13 +116,13 @@ class Level2Update : public EMarketData
 {
   public:
     Level2Update(ptime time, ProviderId pid, InstrumentId iid, const std::vector<Level2_t> &entries)
-        : EMarketData(Event::Type::kLevel2Update), m_entries(entries)
+        : EMarketData(Event::Type::kLevel2Update, time, pid, iid), m_entries(entries)
     {
     }
 
   private:
     std::vector<Level2_t> m_entries;
-}
+};
 
 struct tick_t
 {
@@ -132,7 +134,7 @@ class Level2Snapshot : public EMarketData
 {
   public:
     Level2Snapshot(ptime time, ptime exchange_time, ProviderId pid, InstrumentId iid, const std::vector<tick_t> &bids, const std::vector<tick_t> &asks)
-        : EMarketData(Event::Type::Level2Snapshot, time, pid, iid), m_exchange_time(exchange_time), m_bids(bids), m_asks(asks)
+        : EMarketData(Event::Type::kLevel2Snapshot, time, pid, iid), m_exchange_time(exchange_time), m_bids(bids), m_asks(asks)
     {
     }
 
@@ -140,7 +142,7 @@ class Level2Snapshot : public EMarketData
     ptime m_exchange_time;
     std::vector<tick_t> m_bids;
     std::vector<tick_t> m_asks;
-}
+};
 
 enum class BarType {
     Time = 1,
@@ -191,7 +193,7 @@ enum class BarData
 class EBar : public Event
 {
   public:
-    Bar(ptime open_time, ptime close_time, InstrumentId iid, BarType type, long size,
+    EBar(ptime open_time, ptime close_time, InstrumentId iid, BarType type, long size,
         double open = 0.0, double high = 0.0, double low = 0.0, double close = 0.0, long volume = 0, long openInt = 0)
         : Event(Event::Type::kBar, close_time), m_iid(iid), m_type(type), m_size(size),
           m_open(open), m_high(high), m_low(low), m_close(close), m_vol(volume), m_open_interest(openInt),
@@ -202,7 +204,7 @@ class EBar : public Event
     ptime close_time() const { return time(); }
   private:
     ptime m_open_time;
-    Instrument m_iid;
+    InstrumentId m_iid;
     BarType m_type;
     long m_size;
     double m_open;
