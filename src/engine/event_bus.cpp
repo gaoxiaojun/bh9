@@ -5,37 +5,86 @@ using namespace h9;
 EventBus::EventBus()
     : m_mode(Mode::kSimulation), m_time(min_date_time) {}
 
-bool is_market_event(Event::Type type) {
+bool is_market_event(Event::Type type)
+{
   return type == Event::Type::kAsk || type == Event::Type::kBid ||
          type == Event::Type::kTrade || type == Event::Type::kQuote;
 }
 
-const Event::Pointer &EventBus::dequeue() const {
-
-  if (m_mode == Mode::kRealtime) {
-  } else {
-    while (true) {
-        // 1.update local time
-      auto &e = m_queue.top();
-      if (is_market_event(e->type())) {
-        if (e->time() < m_time) {
+const Event::Pointer &EventBus::dequeue() const
+{
+  if (m_mode == Mode::kRealtime)
+  {
+    while (true)
+    {
+      // 1. check timer
+      if (!m_timer_queue.empty())
+      {
+        auto &reminder = m_timer_queue.top();
+        if (reminder->time() < m_time)
+        {
+          m_timer_queue.pop();
+          return reminder;
+        }
+      }
+      // 2. check has event
+      if (!m_queue.empty())
+      {
+        aut &event = m_queue.top();
+        m_queue.pop();
+        return event;
+      }
+      else // return nullptr to mark no event in queue
+        return nullptr;
+    }
+  } // end realtime mode
+  else
+  { //simulation mode
+    while (true)
+    {
+      // 1.update local time
+      auto event = m_queue.empty() ? nullptr : m_queue.top();
+      if (!event && is_market_event(event->type()))
+      {
+        if (event->time() < m_time)
+        {
           std::cout << "Warning invalid datetime" << std::endl;
           m_queue.pop(); // discard the event
           continue;
         }
-        else {
-            m_time = e->time();
+        else
+        {
+          m_time = event->time();
         }
       }
       // 2. check timer
-      
+      if (!m_timer_queue.empty() && !event)
+      {
+        auto &reminder = m_timer_queue.top();
+        if (reminder->time() < event->time())
+        {
+          m_timer_queue.pop();
+          return reminder;
+        }
+      }
+      // 3.
+      if (!event)
+        m_queue.pop();
+      return event;
     }
   }
 }
 
-ptime EventBus::time() const {
-    if (m_mode == Mode::kRealtime)
-        return boost::posix_time::microsec_clock::local_time();
-    else
-        return m_time;
+void EventBus::add_timer(ptime time, const ReminderCallback &callback)
+{
+  auto eptr = std::make_shared<EReminder>(time, callback);
+  m_timer_queue.push(std::move(eptr));
+}
+
+ptime EventBus::time() const
+{
+  if (m_mode == Mode::kRealtime)
+    return clock::local_time();
+  else
+    return m_time;
 }

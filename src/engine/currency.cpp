@@ -22,7 +22,7 @@ Currency currency_from_string(const std::string &name) {
   return static_cast<Currency>(pos->second);
 }
 
-std::string currency_to_string(Currency currency) {
+const std::string& currency_to_string(Currency currency) {
   static const std::string empty_string = "";
   auto pos = _gCurrencyMap.right.find(static_cast<currency_type>(currency));
   if (pos == _gCurrencyMap.right.end()) {

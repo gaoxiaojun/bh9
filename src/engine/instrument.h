@@ -1,27 +1,30 @@
 #ifndef INSTRUMENT_H
 #define INSTRUMENT_H
 
-#include <boost/date_time.hpp>
-#include <boost/noncopyable.hpp>
+#include "common.h"
 #include <string>
 #include "currency.h"
 
-namespace hal9000 {
+namespace h9
+{
 
-struct AltId {
+struct AltId
+{
   int providerId;
   std::string symbol;
   std::string exchange;
   Currency::Id currency;
 };
 
-struct Leg {
-
+struct Leg
+{
 };
 
-class Instrument : private boost::noncopyable {
+class Instrument : private boost::noncopyable
+{
 public:
-  enum Type {
+  enum Type
+  {
     kStock,
     kFuture,
     kOption,
@@ -33,19 +36,25 @@ public:
     kMultiLeg,
     kSynthetic
   };
-  enum PutCall { kPut, kCall };
+  enum PutCall
+  {
+    kPut,
+    kCall
+  };
 
   Instrument() {}
 
   Instrument(int id, Type type, const std::string &symbol,
              const std::string &description, std::uint8_t currencyId,
              std::string exchange)
-      : this(type, symbol, description, currencyId) {
+      : this(type, symbol, description, currencyId)
+  {
     Id = id;
     Exchange = exchange;
   }
 
-  Instrument(int id, Type synthetic, std::string v1, std::string v2, int v3) {
+  Instrument(int id, Type synthetic, std::string v1, std::string v2, int v3)
+  {
     Id = id;
     this.synthetic = synthetic;
     this.v1 = v1;
@@ -55,14 +64,16 @@ public:
   Instrument(Instrument instrument) { throw new NotImplementedException(); }
 
   Instrument(Type type, std::string symbol, std::string description = "",
-             std::uint8_t currencyId = 148 /* USD */) {
+             std::uint8_t currencyId = 148 /* USD */)
+  {
     m_type = type;
     m_symbol = symbol;
     m_description = description;
     m_currencyId = currencyId;
   }
 
-  std::uint8_t GetCurrencyId(std::uint8_t providerId) {
+  std::uint8_t GetCurrencyId(std::uint8_t providerId)
+  {
     var altId = AltId.Get(providerId);
     if (altId != null && altId.CurrencyId != 0)
       return altId.CurrencyId;
@@ -70,7 +81,8 @@ public:
       return CurrencyId;
   }
 
-  Instrument Clone(std::string symbol = null) {
+  Instrument Clone(std::string symbol = null)
+  {
     var other = new Instrument(this);
     other.Symbol = symbol ? ? other.Symbol;
     return other;
@@ -79,7 +91,8 @@ public:
   std::string ToString();
 
 #region Extra
-  void Init(Framework framework) {
+  void Init(Framework framework)
+  {
     this.framework = framework;
     foreach (var leg in Legs)
       leg.Init(framework);
@@ -101,7 +114,8 @@ private:
 
   Trade Trade;
 
-  ObjectTable Fields;;
+  ObjectTable Fields;
+  ;
 
   List<Leg> Legs;
 
@@ -132,20 +146,21 @@ private:
 
   double TickSize;
 
-  InstrumentType Type ;
-  std::uint8_t CurrencyId ;
+  InstrumentType Type;
+  std::uint8_t CurrencyId;
 
-  std::string Formula ;
+  std::string Formula;
 
   std::string PriceFormat;
   //= "F2";
 
   IDataProvider DataProvider;
 
-  IExecutionProvider ExecutionProvider ;
+  IExecutionProvider ExecutionProvider;
 }
 
-class InstrumentList : IEnumerable<Instrument> {
+class InstrumentList : IEnumerable<Instrument>
+{
 private
   readonly GetByList<Instrument> list =
       new GetByList<Instrument>("Id", "Symbol");
@@ -168,7 +183,8 @@ private
 
   IEnumerator IEnumerable.GetEnumerator() = > GetEnumerator();
 
-  void Add(Instrument instrument) {
+  void Add(Instrument instrument)
+  {
     if (this.list.GetById(instrument.Id) == null)
       this.list.Add(instrument);
     else
@@ -185,5 +201,6 @@ private
   std::string ToString();
 }
 
-}
+} // namespace h9
+
 #endif // INSTRUMENT_H

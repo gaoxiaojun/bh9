@@ -5,12 +5,16 @@
 #include <boost/operators.hpp>
 #include <memory>
 
-namespace h9 {
+namespace h9
+{
 
-class Event : public boost::less_than_comparable<Event> {
+class Event : public boost::less_than_comparable<Event>
+{
 public:
   typedef std::shared_ptr<Event> Pointer;
-  enum Type : std::uint16_t {
+
+  enum Type : std::uint16_t
+  {
     kEvent = 0,
     kTick = 1,
     kBid = 2,
@@ -18,10 +22,8 @@ public:
     kTrade = 4,
     kQuote = 5,
     kBar = 6,
-    kLevel2 = 7,
     kLevel2Snapshot = 8,
     kLevel2Update = 9,
-    kFundamental = 10,
     kNews = 11,
 
     kExecutionReport = 13,
@@ -113,18 +115,20 @@ public:
     kOnSimulatorStart = 228,
     kOnSimulatorStop = 229,
     kOnSimulatorProgress = 230,
-
   };
 
 public:
   Event(Type type, ptime time) : m_time(time), m_type(type) {}
+  virtual ~Event() {}
 
+public:
   inline Type type() const { return m_type; }
 
   inline ptime time() const { return m_time; }
 
-  friend inline bool operator<(const Event &lhs, const Event &rhs) {
-    return lhs.time() < rhs.time();
+  friend inline bool operator<(const Event &lhs, const Event &rhs)
+  {
+    return lhs.m_time < rhs.m_time;
   }
 
 private:
