@@ -134,6 +134,7 @@ public:
 private:
   ptime m_time;
   Type m_type;
+  
 };
 
 } // namespace h9

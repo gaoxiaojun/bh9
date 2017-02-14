@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "event.h"
-#include <queue>
 
 namespace h9
 {

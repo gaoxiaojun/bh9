@@ -8,8 +8,7 @@
 #include <boost/random/random_device.hpp>
 boost::random::mt19937 gen;
 
-//using namespace std;
-using namespace boost;
+using namespace std;
 using namespace h9;
 
 void time_cb(ptime time)
