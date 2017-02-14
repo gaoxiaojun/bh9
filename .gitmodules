@@ -1,0 +1,15 @@
+[submodule "3rd/googletest"]
+	path = 3rd/googletest
+	url = https://github.com/google/googletest.git
+[submodule "3rd/LuaJIT"]
+	path = 3rd/LuaJIT
+	url = https://github.com/LuaJIT/LuaJIT.git
+[submodule "3rd/asio"]
+	path = 3rd/asio
+	url = https://github.com/chriskohlhoff/asio.git
+[submodule "3rd/websocketpp"]
+	path = 3rd/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git
+[submodule "3rd/spdlog"]
+	path = 3rd/spdlog
+	url = https://github.com/gabime/spdlog.git
