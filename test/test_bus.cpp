@@ -9,6 +9,7 @@
 boost::random::mt19937 gen;
 
 using namespace std;
+using namespace boost;
 using namespace h9;
 
 void time_cb(ptime time)
@@ -48,7 +49,7 @@ TEST_CASE("Test EventBus")
             count = count + 1;
             if (e->type() == Event::Type::kAsk)
             {
-                std::shared_ptr<EAsk> ask = std::static_pointer_cast<EAsk>(e);
+                auto ask = static_pointer_cast<EAsk>(e);
                 std::cout << "type:" << ask->type() << " time:" << ask->time() << " index:" << ask->instrument_id() << std::endl;
             }
             else
