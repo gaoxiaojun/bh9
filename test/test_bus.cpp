@@ -39,7 +39,7 @@ TEST_CASE("Test EventBus")
         {
             bus.add_timer(boost::posix_time::second_clock::local_time(), time_cb);
         }
-        
+
         while (true)
         {
             Event::Pointer e = bus.dequeue();
@@ -84,5 +84,30 @@ TEST_CASE("Test EventBus")
         }
         std::cout << "count: " << count << std::endl;
         REQUIRE(count == 10000 + 100);
+    }
+
+    SECTION("test enqueue insert order")
+    {
+        bus.set_mode(EventBus::Mode::kSimulation);
+        int count = 0;
+        ptime last_time = min_date_time;
+        InstrumentId last_index = 0;
+        while (true)
+        {
+            Event::Pointer e = bus.dequeue();
+            if (!e)
+                break;
+            count = count + 1;
+            auto ask = static_pointer_cast<EAsk>(e);
+            std::cout << "type:" << ask->type() << " time:" << ask->time() << " index:" << ask->instrument_id() << std::endl;
+            if (last_time == ask->time()) {
+                REQUIRE(ask->instrument_id() > last_index);  
+            }
+
+            last_index = ask->instrument_id();
+            last_time = ask->time();
+        }
+        std::cout << "count: " << count << std::endl;
+        REQUIRE(count == 10000);
     }
 }
