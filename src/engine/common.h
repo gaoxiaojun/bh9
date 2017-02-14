@@ -27,6 +27,18 @@ template <typename T> struct deref_less {
 template <typename T>
 using min_priority_queue = std::priority_queue<T, std::vector<T>, deref_greater<T>>;
 
+/*inline ptime get_local_to_utc(const ptime& t, const time_zone_ptr& localtz){
+    if(t.is_not_a_date_time()) return t;
+    local_date_time lt(t.date(), t.time_of_day(), localtz, local_date_time::NOT_DATE_TIME_ON_ERROR);
+    return lt.utc_time();
+}
+
+inline local_time()
+{
+    return clock::local_time();
+}*/
+// ptime microsec_clock::local_time()
+// ptime microsec_clock::universal_time()
 } // namespace h9
 
 #endif // DATE_TIME_H
