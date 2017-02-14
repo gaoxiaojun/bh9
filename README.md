@@ -10,7 +10,7 @@ TBD
 Get Involved
 ============
 
-[![Build Status](https://travis-ci.org/gaoxiaojun/h9.png)](https://travis-ci.org/gaoxiaojun/hal9000)
+[![Build Status](https://travis-ci.org/gaoxiaojun/h9.png)](https://travis-ci.org/gaoxiaojun/h9)
 
 **Project Website**
 
