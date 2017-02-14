@@ -1,6 +1,3 @@
-[submodule "3rd/googletest"]
-	path = 3rd/googletest
-	url = https://github.com/google/googletest.git
 [submodule "3rd/LuaJIT"]
 	path = 3rd/LuaJIT
 	url = https://github.com/LuaJIT/LuaJIT.git
