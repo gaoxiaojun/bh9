@@ -136,6 +136,13 @@ private:
   Type m_type;
 };
 
+template <class T, class... Ts>
+Event::Pointer
+make_event(Ts&&... xs)
+{
+  return std::static_pointer_cast<Event>(std::make_shared<T>(std::forward<Ts>(xs)...));
+}
+
 } // namespace h9
 
 #endif // EVENT_H

@@ -59,7 +59,6 @@ public:
 
   void add_timer(ptime time, const ReminderCallback &callback);
 
-  //const T &dequeue() const;
   Event::Pointer dequeue();
 
   ptime time() const;

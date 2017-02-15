@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "market_events.h"
-#include "event_bus.h"
+#include "../src/engine/market_events.h"
+#include "../src/engine/event_bus.h"
 #include <boost/random.hpp>
 #include <boost/random/random_device.hpp>
 boost::random::mt19937 gen;
@@ -26,7 +26,7 @@ TEST_CASE("Test EventBus")
     for (int i = 0; i < 10000; ++i)
     {
         int sec = index + random_gen(gen);
-        Event::Pointer e(new EAsk(boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(sec), 0, ++index, 1.0, 100));
+        Event::Pointer e = make_event<EAsk>(boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(sec), 0, ++index, 1.0, 100);
         bus.enqueue(std::move(e));
     }
 

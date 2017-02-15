@@ -13,6 +13,8 @@ namespace h9
 {
 
 using ptime = boost::posix_time::ptime;
+using time_duration = boost::posix_time::time_duration;
+using time_period = boost::posix_time::time_period;
 using time_zone_ptr = boost::local_time::time_zone_ptr;
 using boost::date_time::special_values;
 using boost::date_time::not_special;
