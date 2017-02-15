@@ -2,8 +2,10 @@
 #include <iostream>
 using namespace h9;
 
-//TODO: reminderOrder
-EventBus::EventBus() : m_mode(Mode::kSimulation), m_time(min_date_time), m_reminder_order(ReminderOrder::kBefore) {}
+// TODO: reminderOrder
+EventBus::EventBus()
+    : m_mode(Mode::kSimulation), m_time(min_date_time),
+      m_reminder_order(ReminderOrder::kBefore) {}
 
 inline bool is_market_event(Event::Type type) {
   return type == Event::Type::kAsk || type == Event::Type::kBid ||
@@ -20,10 +22,10 @@ Event::Pointer EventBus::dequeue() {
   if (m_mode == Mode::kRealtime) {
     while (true) {
       // 1. check local clock timer
-      if (! m_local_clock_queue.empty()) {
-        auto reminder =  m_local_clock_queue.top();
+      if (!m_local_clock_queue.empty()) {
+        auto reminder = m_local_clock_queue.top();
         if (reminder->time() < time()) {
-           m_local_clock_queue.pop();
+          m_local_clock_queue.pop();
           return reminder;
         }
       }
@@ -51,10 +53,10 @@ Event::Pointer EventBus::dequeue() {
         }
       }
       // 2. check local clock timer
-      if (! m_local_clock_queue.empty() && event) {
-        auto reminder =  m_local_clock_queue.top();
+      if (!m_local_clock_queue.empty() && event) {
+        auto reminder = m_local_clock_queue.top();
         if (reminder->time() < event->time()) {
-           m_local_clock_queue.pop();
+          m_local_clock_queue.pop();
           return reminder;
         }
       }
@@ -67,14 +69,28 @@ Event::Pointer EventBus::dequeue() {
   }
 }
 
-/*void EventBus::add_timer(ptime time, const ReminderCallback &callback) {
-  auto eptr = std::make_shared<EReminder>(time, callback);
-   m_local_clock_queue.push(std::move(eptr));
-}*/
+void EventBus::clear() {
+  m_queue.clear();
+  m_local_clock_queue.clear();
+}
 
 ptime EventBus::time() const {
   if (m_mode == Mode::kRealtime)
     return clock::local_time();
   else
     return m_time;
+}
+
+void EventBus::enqueue(const Event::Pointer &e) {
+  if (e->type() != Event::Type::kReminder)
+    m_queue.push(e);
+  else
+    m_local_clock_queue.push(e);
+}
+
+void EventBus::enqueue(Event::Pointer &&e) {
+  if (e->type() != Event::Type::kReminder)
+    m_queue.push(e);
+  else
+    m_local_clock_queue.push(e);
 }

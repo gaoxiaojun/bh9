@@ -41,19 +41,8 @@ public:
 
   bool empty() const { return m_queue.empty() && m_local_clock_queue.empty(); }
 
-  void enqueue(const Event::Pointer &e) {
-    if (e->type() != Event::Type::kReminder)
-      m_queue.push(e);
-    else
-      m_local_clock_queue.push(e);
-  }
-
-  void enqueue(Event::Pointer &&e) {
-    if (e->type() != Event::Type::kReminder)
-      m_queue.push(e);
-    else
-      m_local_clock_queue.push(e);
-  }
+  void enqueue(const Event::Pointer &e);
+  void enqueue(Event::Pointer &&e);
 
   Event::Pointer dequeue();
 
