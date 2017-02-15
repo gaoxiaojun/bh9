@@ -1,5 +1,6 @@
 #include "bar_factory_item.h"
-
+#include "market_events.h"
+#include "bar_factory.h"
 using namespace h9;
 
 BarFactoryItem::BarFactoryItem(InstrumentId iid, Bar::Type barType, long barSize, Bar::Input barInput, ProviderId pid)
@@ -8,7 +9,7 @@ BarFactoryItem::BarFactoryItem(InstrumentId iid, Bar::Type barType, long barSize
 
 void BarFactoryItem::process(const Event::Pointer &e) {
     auto tick = event_cast<ETick>(e);
-    if (m_pid != -1 && tick->pid() != m_pid)
+    if (m_pid != -1 && tick->provider_id() != m_pid)
         return;
 
     if (!in_session(tick->time()))
@@ -17,12 +18,12 @@ void BarFactoryItem::process(const Event::Pointer &e) {
     on_data(e);
 }
 
-void BarFactoryItem::on_data(Event::Pointer e) {
+void BarFactoryItem::on_data(const Event::Pointer& e) {
     auto tick = event_cast<ETick>(e);
     if (m_bar == nullptr) {
-        doubel price = tick->price();
-        m_bar = new Bar(get_open_time(e), get_event_time(e, Clock::kLocal), tick->iid(),
-                        m_type, m_size, price, price, price, price, tick->size());
+        double price = tick->price();
+        m_bar = new Bar(get_bar_open_time(e), e->time(), tick->instrument_id(),
+                        m_type, m_size, price, price, price, price, tick->volume());
         m_bar->setStatus(Bar::Status::kOpen);
         m_factory.framework().event_server().on_event(m_bar);
     } else {
@@ -34,19 +35,13 @@ void BarFactoryItem::on_data(Event::Pointer e) {
 
         m_bar->set_close(tick->price());
         m_bar->set_volume(m_bar->volume() + tick->size());
-        m_bar->set_time(get_event_time(e, Clock::Type::kLocal)); // Q: this update EBar time, not bar
+        m_bar->set_time(e->time()); // Q: this update EBar time, not bar
     }
 }
 
-ptime BarFactoryItem::get_event_time(Event::Pointer e, Clock::Type type)
+bool BarFactoryItem::add_reminder(ptime time)
 {
-    ETick *tick = static_cast<ETick*>(e.get());
-    return type == Clock::Type::kLocal ? tick->time() : tick->exchange_time();
-}
-
-bool BarFactoryItem::add_reminder(ptime time, Clock::Type type)
-{
-    m_factory->add_reminder(*this, ptime, type);
+    m_factory->add_reminder(*this, ptime);
 }
 
 void BarFactoryItem::emit_bar()

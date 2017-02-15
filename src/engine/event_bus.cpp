@@ -2,7 +2,8 @@
 #include <iostream>
 using namespace h9;
 
-EventBus::EventBus() : m_mode(Mode::kSimulation), m_time(min_date_time) {}
+//TODO: reminderOrder
+EventBus::EventBus() : m_mode(Mode::kSimulation), m_time(min_date_time), m_reminder_order(ReminderOrder::kBefore) {}
 
 inline bool is_market_event(Event::Type type) {
   return type == Event::Type::kAsk || type == Event::Type::kBid ||
@@ -66,10 +67,10 @@ Event::Pointer EventBus::dequeue() {
   }
 }
 
-void EventBus::add_timer(ptime time, const ReminderCallback &callback) {
+/*void EventBus::add_timer(ptime time, const ReminderCallback &callback) {
   auto eptr = std::make_shared<EReminder>(time, callback);
    m_local_clock_queue.push(std::move(eptr));
-}
+}*/
 
 ptime EventBus::time() const {
   if (m_mode == Mode::kRealtime)

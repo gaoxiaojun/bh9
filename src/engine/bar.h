@@ -3,8 +3,11 @@
 
 #include "common.h"
 #include "event.h"
+#include "market_events.h"
+
 namespace h9 {
 
+// Bar or EBar { Bar }
 class Bar : public Event {
 public:
   enum class Type { kTime = 1, kTick, kVolume, kRange, kSession };
@@ -12,23 +15,6 @@ public:
   enum class Status { kIncomplete, kComplete, kOpen, kHigh, kLow, kClose };
 
   enum class Input { kTrade, kBid, kAsk, kMiddle, kTick, kBidAsk };
-
-  enum class Data {
-    kClose,
-    kOpen,
-    kHigh,
-    kLow,
-    kMedian,
-    kTypical,
-    kWeighted,
-    kAverage,
-    kVolume,
-    kOpenInt,
-    kRange,
-    kMean,
-    kVariance,
-    kStdDev
-  };
 
 public:
   Bar(ptime open_time, ptime close_time, InstrumentId iid, BarType type,
@@ -88,7 +74,7 @@ public:
 private:
   ptime m_open_time;
   ptime m_close_time;
-  ProvierId m_pid;
+  ProviderId m_pid;
   InstrumentId m_iid;
   Type m_type;
   long m_size;

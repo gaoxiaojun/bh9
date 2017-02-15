@@ -22,51 +22,44 @@ private:
 
 class ETick : public EMarketData {
 public:
-  ETick(Event::Type type, ptime time, ptime exchange_time, ProviderId pid,
-        InstrumentId iid, double price, double vol)
-      : EMarketData(type, time, pid, iid), m_exchange_time(exchange_time),
-        m_price(price), m_vol(vol) {}
+  ETick(Event::Type type, ptime time, ProviderId pid, InstrumentId iid,
+        double price, long vol)
+      : EMarketData(type, time, pid, iid), m_price(price), m_vol(vol) {}
   double price() const noexcept { return m_price; }
-  double volume() const noexcept { return m_vol; }
-  ptime exchange_time() const noexcept { return m_exchange_time; }
+  long volume() const noexcept { return m_vol; }
 
 private:
-  ptime m_exchange_time;
   double m_price;
   double m_vol;
 };
 
 class EAsk : public ETick {
 public:
-  EAsk(ptime time, ptime exchange_time, ProviderId pid, InstrumentId iid,
-       double price, double vol)
-      : ETick(Event::Type::kAsk, time, exchange_time, pid, iid, price, vol) {}
+  EAsk(ptime time, ProviderId pid, InstrumentId iid, double price, long vol)
+      : ETick(Event::Type::kAsk, time, pid, iid, price, vol) {}
 };
 
 class EBid : public ETick {
 public:
-  EBid(ptime time, ptime exchange_time, ProviderId pid, InstrumentId iid,
-       double price, double vol)
-      : ETick(Event::Type::kBid, time, exchange_time, pid, iid, price, vol) {}
+  EBid(ptime time, ProviderId pid, InstrumentId iid, double price, long vol)
+      : ETick(Event::Type::kBid, time, pid, iid, price, vol) {}
 };
 
 class ETrade : public ETick {
 public:
-  ETrade(ptime time, ptime exchange_time, ProviderId pid, InstrumentId iid,
-         double price, double vol)
-      : ETick(Event::Type::kTrade, time, exchange_time, pid, iid, price, vol) {}
+  ETrade(ptime time, ProviderId pid, InstrumentId iid, double price, long vol)
+      : ETick(Event::Type::kTrade, time, pid, iid, price, vol) {}
 };
 
 class EQuote : public EMarketData {
 public:
-  EQuote(ptime time, ptime exchange_time, ProviderId pid, InstrumentId iid,
-         double askprice, double askvol, double bidprice, double bidvol)
+  EQuote(ptime time, ProviderId pid, InstrumentId iid, double askprice,
+         double askvol, double bidprice, double bidvol)
       : EMarketData(Event::Type::kQuote, time, pid, iid),
-        m_exchange_time(exchange_time), m_askprice(askprice), m_askvol(askvol),
+        m_askprice(askprice), m_askvol(askvol),
         m_bidprice(bidprice), m_bidvol(bidvol) {}
 
 private:
-  ptime m_exchange_time;
   double m_askprice;
   double m_askvol;
   double m_bidprice;
@@ -110,19 +103,18 @@ private:
 
 struct tick_t {
   double price;
-  double vol;
+  long vol;
 };
 
 class Level2Snapshot : public EMarketData {
 public:
-  Level2Snapshot(ptime time, ptime exchange_time, ProviderId pid,
-                 InstrumentId iid, const std::vector<tick_t> &bids,
+  Level2Snapshot(ptime time, ProviderId pid, InstrumentId iid,
+                 const std::vector<tick_t> &bids,
                  const std::vector<tick_t> &asks)
       : EMarketData(Event::Type::kLevel2Snapshot, time, pid, iid),
-        m_exchange_time(exchange_time), m_bids(bids), m_asks(asks) {}
+        m_bids(bids), m_asks(asks) {}
 
 private:
-  ptime m_exchange_time;
   std::vector<tick_t> m_bids;
   std::vector<tick_t> m_asks;
 };

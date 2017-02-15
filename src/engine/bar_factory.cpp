@@ -88,7 +88,6 @@ void BarFactory::on_data(const Event::Pointer &e) {
   }
 }
 
-bool BarFactory::add_reminder(const BarFactoryItem &item, ptime time,
-                              Clock::Type type) {}
+bool BarFactory::add_reminder(const BarFactoryItem &item, ptime time) {}
 
 void BarFactory::on_reminder(ptime time, const BFItemPtr &item) {}

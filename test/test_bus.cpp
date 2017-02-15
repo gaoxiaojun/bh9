@@ -23,8 +23,7 @@ TEST_CASE("Test EventBus") {
     int sec = index + random_gen(gen);
     Event::Pointer e = make_event<EAsk>(
         boost::posix_time::second_clock::local_time() +
-            boost::posix_time::seconds(sec),
-        boost::posix_time::second_clock::local_time(), 0, ++index, 1.0, 100);
+            boost::posix_time::seconds(sec), 0, ++index, 1.0, 100);
     bus.enqueue(std::move(e));
   }
 
@@ -33,7 +32,8 @@ TEST_CASE("Test EventBus") {
     int count = 0;
 
     for (int i = 0; i < 100; ++i) {
-      bus.add_timer(boost::posix_time::second_clock::local_time(), time_cb);
+        auto r = std::make_shared<EReminder>(boost::posix_time::second_clock::local_time(), time_cb);
+      bus.enqueue(r);
     }
 
     while (true) {
@@ -57,9 +57,10 @@ TEST_CASE("Test EventBus") {
     int count = 0;
 
     for (int i = 0; i < 100; ++i) {
-      bus.add_timer(boost::posix_time::second_clock::local_time() +
+      auto r= std::make_shared<EReminder>(boost::posix_time::second_clock::local_time() +
                         boost::posix_time::seconds(i * 10),
                     time_cb);
+      bus.enqueue(r);
     }
 
     while (true) {

@@ -2,7 +2,7 @@
 #define DATE_TIME_H
 
 /**
- *  IMPORTANT: in h9 framework time means local timezone time
+ *  IMPORTANT: in h9 framework *time* means local timezone time
  */
 
 #include <boost/date_time.hpp>
