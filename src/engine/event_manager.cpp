@@ -3,8 +3,9 @@
 
 using namespace h9;
 
-EventManager::EventManager()
-    : m_stepping(false), m_step_event(Event::Type::kEvent)
+EventManager::EventManager(Framework *framework, EventBus *bus)
+    : m_framework(framework), m_bus(bus)
+    ,m_stepping(false), m_step_event(Event::Type::kEvent)
 {
 
 }

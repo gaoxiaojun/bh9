@@ -5,29 +5,29 @@
 #include "event.h"
 namespace h9 {
 
-class Bar {
+class Bar : public Event {
 public:
-  enum class Type { Time = 1, Tick, Volume, Range, Session };
+  enum class Type { kTime = 1, kTick, kVolume, kRange, kSession };
 
-  enum class Status { Incomplete, Complete, Open, High, Low, Close };
+  enum class Status { kIncomplete, kComplete, kOpen, kHigh, kLow, kClose };
 
-  enum class Input { Trade, Bid, Ask, Middle, Tick, BidAsk };
+  enum class Input { kTrade, kBid, kAsk, kMiddle, kTick, kBidAsk };
 
   enum class Data {
-    Close,
-    Open,
-    High,
-    Low,
-    Median,
-    Typical,
-    Weighted,
-    Average,
-    Volume,
-    OpenInt,
-    Range,
-    Mean,
-    Variance,
-    StdDev
+    kClose,
+    kOpen,
+    kHigh,
+    kLow,
+    kMedian,
+    kTypical,
+    kWeighted,
+    kAverage,
+    kVolume,
+    kOpenInt,
+    kRange,
+    kMean,
+    kVariance,
+    kStdDev
   };
 
 public:
@@ -50,14 +50,17 @@ public:
   double close() const { return m_close; }
 
   double high() const { return m_high; }
+  void set_high(double v) { m_high = v; }
 
-  double low() const { return m_close; }
+  double low() const { return m_low; }
+  void set_low(double v) { m_low = v; }
 
   long volume() const { return m_vol; }
 
   long openInt() const { return m_open_interest; }
 
   Status status() const { return m_status; }
+  void set_status(Status status) { m_status = status; }
 
   Type type() const { return m_type; }
 
@@ -66,6 +69,11 @@ public:
   ProviderId pid() const { return m_pid; }
 
   ptime time() const { return m_close_time; }
+  void set_time(ptime time) {
+    m_time = time;
+    m_close_time = time;
+  }
+
 public:
   double range() const { return m_high - m_low; }
 

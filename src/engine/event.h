@@ -2,19 +2,16 @@
 #define EVENT_H
 
 #include "common.h"
+#include <boost/checked_delete.hpp>
 #include <boost/operators.hpp>
 #include <memory>
+namespace h9 {
 
-namespace h9
-{
-
-class Event : public boost::less_than_comparable<Event>
-{
+class Event : public boost::less_than_comparable<Event> {
 public:
   typedef std::shared_ptr<Event> Pointer;
 
-  enum Type : std::uint16_t
-  {
+  enum Type : std::uint16_t {
     kEvent = 0,
     kTick = 1,
     kBid = 2,
@@ -125,9 +122,9 @@ public:
   inline Type type() const { return m_type; }
 
   inline ptime time() const { return m_time; }
+  void set_time(ptime time) { m_time = time; }
 
-  friend inline bool operator<(const Event &lhs, const Event &rhs)
-  {
+  friend inline bool operator<(const Event &lhs, const Event &rhs) {
     return lhs.m_time < rhs.m_time;
   }
 
@@ -136,11 +133,13 @@ private:
   Type m_type;
 };
 
-template <class T, class... Ts>
-Event::Pointer
-make_event(Ts&&... xs)
-{
-  return std::static_pointer_cast<Event>(std::make_shared<T>(std::forward<Ts>(xs)...));
+template <class T, class... Ts> Event::Pointer make_event(Ts &&... xs) {
+  return std::static_pointer_cast<Event>(
+      std::make_shared<T>(std::forward<Ts>(xs)...));
+}
+
+template <class T> std::shared_ptr<T> event_cast(const Event::Pointer& e) {
+  return std::static_pointer_cast<T>(e);
 }
 
 } // namespace h9

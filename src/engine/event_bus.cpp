@@ -18,15 +18,16 @@ inline void show_warning(Event::Type type, ptime etime, ptime ctime) {
 Event::Pointer EventBus::dequeue() {
   if (m_mode == Mode::kRealtime) {
     while (true) {
-      // 1. check timer
-      if (!m_timer_queue.empty()) {
-        auto reminder = m_timer_queue.top();
+      // 1. check local clock timer
+      if (! m_local_clock_queue.empty()) {
+        auto reminder =  m_local_clock_queue.top();
         if (reminder->time() < time()) {
-          m_timer_queue.pop();
+           m_local_clock_queue.pop();
           return reminder;
         }
       }
-      // 2. check has event
+      // 2. check exchange clock timer
+      // 3. check has event
       if (!m_queue.empty()) {
         auto event = m_queue.top();
         m_queue.pop();
@@ -48,15 +49,16 @@ Event::Pointer EventBus::dequeue() {
           m_time = event->time();
         }
       }
-      // 2. check timer
-      if (!m_timer_queue.empty() && event) {
-        auto reminder = m_timer_queue.top();
+      // 2. check local clock timer
+      if (! m_local_clock_queue.empty() && event) {
+        auto reminder =  m_local_clock_queue.top();
         if (reminder->time() < event->time()) {
-          m_timer_queue.pop();
+           m_local_clock_queue.pop();
           return reminder;
         }
       }
-      // 3.
+      // 3. check exchange clock timer;
+      // 4.
       if (event)
         m_queue.pop();
       return event;
@@ -66,7 +68,7 @@ Event::Pointer EventBus::dequeue() {
 
 void EventBus::add_timer(ptime time, const ReminderCallback &callback) {
   auto eptr = std::make_shared<EReminder>(time, callback);
-  m_timer_queue.push(std::move(eptr));
+   m_local_clock_queue.push(std::move(eptr));
 }
 
 ptime EventBus::time() const {

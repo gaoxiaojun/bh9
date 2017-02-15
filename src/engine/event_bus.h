@@ -6,6 +6,7 @@
 
 namespace h9
 {
+class Framework;
 
 typedef std::function<void(ptime time)> ReminderCallback;
 
@@ -38,7 +39,7 @@ public:
   Mode mode() const noexcept { return m_mode; }
   void set_mode(Mode mode) noexcept { m_mode = mode; }
   
-  bool empty() const { return m_queue.empty() && m_timer_queue.empty(); }
+  bool empty() const { return m_queue.empty() &&  m_local_clock_queue.empty(); }
   //std::size_t size() const { return m_queue.size(); }
 
   void enqueue(const Event::Pointer &e)
@@ -46,7 +47,7 @@ public:
     if (e->type() != Event::Type::kReminder)
       m_queue.push(e);
     else
-      m_timer_queue.push(e);
+       m_local_clock_queue.push(e);
   }
 
   void enqueue(Event::Pointer &&e)
@@ -54,7 +55,7 @@ public:
     if (e->type() != Event::Type::kReminder)
       m_queue.push(e);
     else
-      m_timer_queue.push(e);
+       m_local_clock_queue.push(e);
   }
 
   void add_timer(ptime time, const ReminderCallback &callback);
@@ -68,7 +69,9 @@ private:
   ptime m_time;
  
   min_priority_queue<Event::Pointer> m_queue;
-  min_priority_queue<EReminder::Pointer> m_timer_queue;
+  // 为了减轻定时器的开销，同一个时间的定时器回调串成链表，向Bus仅仅发送一个定时器请求
+  min_priority_queue<EReminder::Pointer>  m_local_clock_queue;
+  min_priority_queue<EReminder::Pointer>  m_exchange_clock_queue;
 };
 
 } // namespace h9

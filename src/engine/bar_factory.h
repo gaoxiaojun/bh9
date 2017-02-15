@@ -2,35 +2,17 @@
 #define BAR_FACTORY_H
 
 #include "bar.h"
+#include "bar_factory_item.h"
+#include "clock.h"
 #include "event.h"
+#include <unordered_map>
 
 namespace h9 {
 
-class BarFactory;
-
-class BarFactoryItem {
-public:
-protected:
-  void process(Event::Pointer e);
-  virtual void on_data(Event::Pointer);
-  virtual void on_reminder(ptime time);
-  virtual ptime get_bar_open_time(Event::Pointer e);
-  virtual ptime get_bar_close_time(Event::Pointer e);
-  virtual ptime get_time(Event::Pointer e);
-  bool add_reminder(ptime time);
-  void emit_bar();
-
-private:
-  BarFactory &m_bar_factory;
-  ProviderId m_pid;
-  InstrumentId m_iid;
-  Bar::Type m_type;
-  Bar::Input m_input;
-  long m_bar_size;
-  bool m_session_enable;
-};
+using BFItemPtr = std::shared_ptr<BarFactoryItem>;
 
 class BarFactory {
+
 public:
   explicit BarFactory();
 
@@ -41,8 +23,13 @@ public:
 
 protected:
   void on_data(const Event::Pointer &e);
-  bool add_reminder(const BarFactoryItem &item, ptime time);
-  void on_reminder(ptime time);
+  bool add_reminder(const BarFactoryItem &item, ptime time, Clock::Type type);
+  void on_reminder(ptime time, const BFItemPtr &item);
+
+private:
+  using ItemList = std::vector<BFItemPtr>;
+  std::unordered_map<int, ItemList> m_item_lists;
+  std::unordered_map<ptime, ItemList> m_reminder_lists;
 };
 
 } // namespace h9

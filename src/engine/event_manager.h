@@ -1,11 +1,13 @@
 #ifndef EVENT_MANAGER_H
 #define EVENT_MANAGER_H
 
-#include "event_bus.h"
 #include "bar_factory.h"
 #include "bar_slice_factory.h"
+#include "event_bus.h"
 
 namespace h9 {
+class Framework;
+class EventBus;
 
 class EventFilter {
 public:
@@ -17,7 +19,7 @@ public:
   enum class Status { Running, Paused, Stopping, Stopped };
 
 public:
-  explicit EventManager();
+  explicit EventManager(Framework *framework, EventBus *bus);
   ~EventManager();
 
 public:
@@ -108,7 +110,8 @@ protected:
   void on_strategy_event(const Event::Pointer &e);
 
 private:
-  EventBus m_bus;
+  Framework *m_framework;
+  EventBus *m_bus;
   Status m_status;
   BarFactory m_bar_factory;
   BarSliceFactory m_slice_factory;
