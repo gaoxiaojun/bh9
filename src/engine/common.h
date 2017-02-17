@@ -8,7 +8,7 @@
 #include <boost/date_time.hpp>
 #include <boost/noncopyable.hpp>
 #include <queue>
-
+#include <set>
 namespace h9
 {
 
@@ -30,18 +30,23 @@ using noncopyable = boost::noncopyable;
 template <typename T>
 struct deref_greater
 {
-  bool operator()(const T &lhs, const T &rhs) { return *lhs > *rhs; }
+  bool operator()(const T &lhs, const T &rhs) const { return *lhs > *rhs; }
 };
 
 template <typename T>
 struct deref_less
 {
-  bool operator()(const T &lhs, const T &rhs) { return *lhs < *rhs; }
+  bool operator()(const T &lhs, const T &rhs) const { return *lhs < *rhs; }
 };
 
-template <typename T>
-using min_priority_queue = std::priority_queue<T, std::vector<T>, deref_greater<T>>;
+//template <class T>
+//using min_priority_queue = std::priority_queue<T, std::vector<T>, deref_greater<T>>;
+template<typename T>
+using min_priority_queue =  std::multiset<T ,deref_less<T>>;
 
+
+using ProviderId = std::int16_t;
+using InstrumentId = std::int32_t;
 
 } // namespace h9
 

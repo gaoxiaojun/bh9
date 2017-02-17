@@ -6,24 +6,22 @@
 #include "../src/engine/market_events.h"
 #include <boost/random.hpp>
 #include <boost/random/random_device.hpp>
-boost::random::mt19937 gen;
 
 using namespace std;
 using namespace h9;
 
-void time_cb(ptime time) { std::cout << "time:" << time << std::endl; }
-
-TEST_CASE("Test EventBus") {
-
+TEST_CASE("EventBus") {
+  boost::random::mt19937 gen;
   // prepare test data set
   EventBus bus;
   boost::uniform_int<> random_gen(-10, 10);
   int index = 0;
   for (int i = 0; i < 10000; ++i) {
     int sec = index + random_gen(gen);
-    Event::Pointer e = make_event<EAsk>(
-        boost::posix_time::second_clock::local_time() +
-            boost::posix_time::seconds(sec), 0, ++index, 1.0, 100);
+    Event::Pointer e =
+        make_event<EAsk>(boost::posix_time::second_clock::local_time() +
+                             boost::posix_time::seconds(sec),
+                         0, ++index, 1.0, 100);
     bus.enqueue(std::move(e));
   }
 
@@ -32,7 +30,8 @@ TEST_CASE("Test EventBus") {
     int count = 0;
 
     for (int i = 0; i < 100; ++i) {
-        auto r = std::make_shared<EReminder>(boost::posix_time::second_clock::local_time(), time_cb);
+      auto r = make_event<EReminder>(
+          boost::posix_time::second_clock::local_time(), nullptr);
       bus.enqueue(r);
     }
 
@@ -43,13 +42,15 @@ TEST_CASE("Test EventBus") {
       count = count + 1;
       if (e->type() == Event::Type::kAsk) {
         auto ask = event_cast<EAsk>(e);
-        std::cout << "type:" << ask->type() << " time:" << ask->time()
-                  << " index:" << ask->instrument_id() << std::endl;
-      } else
-        std::cout << "type:" << e->type() << " time:" << e->time() << std::endl;
+        // std::cout << "type:" << ask->type() << " time:" << ask->time()
+        //          << " index:" << ask->instrument_id() << std::endl;
+      } // else
+      // std::cout << "type:" << e->type() << " time:" << e->time() <<
+      // std::endl;
     }
-    std::cout << "count: " << count << std::endl;
+    // std::cout << "count: " << count << std::endl;
     REQUIRE(count == 10000 + 100);
+    REQUIRE(bus.empty());
   }
 
   SECTION("simulation mode dequeue") {
@@ -57,9 +58,10 @@ TEST_CASE("Test EventBus") {
     int count = 0;
 
     for (int i = 0; i < 100; ++i) {
-      auto r= std::make_shared<EReminder>(boost::posix_time::second_clock::local_time() +
-                        boost::posix_time::seconds(i * 10),
-                    time_cb);
+      auto r =
+          make_event<EReminder>(boost::posix_time::second_clock::local_time() +
+                                    boost::posix_time::seconds(i * 10),
+                                nullptr);
       bus.enqueue(r);
     }
 
@@ -70,13 +72,15 @@ TEST_CASE("Test EventBus") {
       count = count + 1;
       if (e->type() == Event::Type::kAsk) {
         auto ask = event_cast<EAsk>(e);
-        std::cout << "type:" << ask->type() << " time:" << ask->time()
-                  << " index:" << ask->instrument_id() << std::endl;
-      } else
-        std::cout << "type:" << e->type() << " time:" << e->time() << std::endl;
+        // std::cout << "type:" << ask->type() << " time:" << ask->time()
+        //          << " index:" << ask->instrument_id() << std::endl;
+      } // else
+      // std::cout << "type:" << e->type() << " time:" << e->time() <<
+      // std::endl;
     }
-    std::cout << "count: " << count << std::endl;
+    // std::cout << "count: " << count << std::endl;
     REQUIRE(count == 10000 + 100);
+    REQUIRE(bus.empty());
   }
 
   SECTION("test enqueue insert order") {
@@ -90,8 +94,8 @@ TEST_CASE("Test EventBus") {
         break;
       count = count + 1;
       auto ask = event_cast<EAsk>(e);
-      std::cout << "type:" << ask->type() << " time:" << ask->time()
-                << " index:" << ask->instrument_id() << std::endl;
+      // std::cout << "type:" << ask->type() << " time:" << ask->time()
+      //          << " index:" << ask->instrument_id() << std::endl;
       if (last_time == ask->time()) {
         REQUIRE(ask->instrument_id() > last_index);
       }
@@ -99,7 +103,7 @@ TEST_CASE("Test EventBus") {
       last_index = ask->instrument_id();
       last_time = ask->time();
     }
-    std::cout << "count: " << count << std::endl;
+    // std::cout << "count: " << count << std::endl;
     REQUIRE(count == 10000);
   }
 }

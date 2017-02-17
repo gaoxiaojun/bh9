@@ -1,9 +1,8 @@
 #ifndef BAR_FACTORY_H
 #define BAR_FACTORY_H
 
-#include "bar.h"
+#include "bar2.h"
 #include "bar_factory_item.h"
-#include "clock.h"
 #include "event.h"
 #include <unordered_map>
 
@@ -22,7 +21,7 @@ public:
   void clear();
 
 protected:
-  void on_data(const Event::Pointer &e);
+  void on_event(const Event::Pointer &e);
   bool add_reminder(const BarFactoryItem &item, ptime time);
   void on_reminder(ptime time, const BFItemPtr &item);
 

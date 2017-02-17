@@ -8,83 +8,60 @@
 namespace h9 {
 
 // Bar or EBar { Bar }
-class Bar : public Event {
+class Bar {
 public:
   enum class Type { kTime = 1, kTick, kVolume, kRange, kSession };
 
   enum class Status { kIncomplete, kComplete, kOpen, kHigh, kLow, kClose };
 
-  enum class Input { kTrade, kBid, kAsk, kMiddle, kTick, kBidAsk };
-
 public:
-  Bar(ptime open_time, ptime close_time, InstrumentId iid, BarType type,
+  Bar(ptime open_time, ptime close_time, InstrumentId iid, Bar::Type type,
       long size, double open = 0.0, double high = 0.0, double low = 0.0,
       double close = 0.0, long volume = 0, long openInt = 0)
-      : m_open_time(opent_time), m_close_time(close_time), m_iid(iid),
-        m_type(type), m_size(size), m_open(open), m_high(high), m_low(low),
-        m_close(close), m_vol(volume), m_open_interest(openInt),
-        m_status(open_time == close_time ? BarStatus::Open : BarStatus::Close) {
+      : open_time(opent_time), close_time(close_time), iid(iid),
+        type(type), size(size), open(open), high(high), low(low),
+        close(close), vol(volume), open_interest(openInt),
+        status(open_time == close_time ? Bar::Status::kOpen : Bar::Status::kClose) {
   }
 
 public:
-  ptime close_time() const { return m_close_time; }
-
-  ptime open_time() const { return m_open_time; }
-
-  double open() const { return m_open; }
-
-  double close() const { return m_close; }
-
-  double high() const { return m_high; }
-  void set_high(double v) { m_high = v; }
-
-  double low() const { return m_low; }
-  void set_low(double v) { m_low = v; }
-
-  long volume() const { return m_vol; }
-
-  long openInt() const { return m_open_interest; }
-
-  Status status() const { return m_status; }
-  void set_status(Status status) { m_status = status; }
-
-  Type type() const { return m_type; }
-
-  InstrumentId iid() const { return m_iid; }
-
-  ProviderId pid() const { return m_pid; }
-
-  ptime time() const { return m_close_time; }
+  ptime time() const { return close_time; }
   void set_time(ptime time) {
-    m_time = time;
-    m_close_time = time;
+    time = time;
+    close_time = time;
   }
 
 public:
-  double range() const { return m_high - m_low; }
+  double range() const { return high - low; }
 
-  double median() const { return (m_high + m_low) / 2; }
+  double median() const { return (high + low) / 2; }
 
-  double typical() const { return (m_high + m_low + m_close) / 3; }
+  double typical() const { return (high + low + close) / 3; }
 
-  double weighted() const { return (m_high + m_low + 2 * m_close) / 4; }
+  double weighted() const { return (high + low + 2 * close) / 4; }
 
-  double average() const { return (m_high + m_low + m_open + m_close) / 4; }
+  double average() const { return (high + low + open + close) / 4; }
 
-private:
-  ptime m_open_time;
-  ptime m_close_time;
-  ProviderId m_pid;
-  InstrumentId m_iid;
-  Type m_type;
-  long m_size;
-  double m_open;
-  double m_high;
-  double m_low;
-  double m_close;
-  long m_vol;
-  long m_open_interest;
-  Status m_status;
+public:
+  ptime open_time;
+  ptime close_time;
+  ProviderId pid;
+  InstrumentId iid;
+  Type type;
+  long size;
+  double open;
+  double high;
+  double low;
+  double close;
+  long volume;
+  long open_interest;
+  long N;
+  Status status;
+};
+
+class EBar : public Event {
+public:
+    Bar bar;
 };
 
 } // namespace h9

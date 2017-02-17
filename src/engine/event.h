@@ -4,7 +4,7 @@
 #include "common.h"
 #include <boost/checked_delete.hpp>
 #include <boost/operators.hpp>
-#include <memory>
+
 namespace h9 {
 
 class Event : public boost::less_than_comparable<Event> {

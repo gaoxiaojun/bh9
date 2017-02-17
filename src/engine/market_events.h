@@ -5,9 +5,6 @@
 
 namespace h9 {
 
-using ProviderId = std::uint16_t;
-using InstrumentId = std::uint32_t;
-
 class EMarketData : public Event {
 public:
   EMarketData(Event::Type type, ptime time, ProviderId pid, InstrumentId iid)

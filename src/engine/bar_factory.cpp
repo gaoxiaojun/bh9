@@ -16,7 +16,7 @@ void BarFactory::add(const BarFactoryItem &item) {
 
   auto it = std::find_if(
       list.begin(), list.end(),
-      [item](std::shared_ptr<BarFactoryItem> const &i) { return *i == item; });
+      [item](const std::shared_ptr<BarFactoryItem> &i) { return *i == item; });
 
   if (it == list.end())
     list.add(item);
@@ -30,7 +30,7 @@ void BarFactory::remove(const BarFactoryItem &item) {
 
   auto it = std::find_if(
       list.begin(), list.end(),
-      [item](std::shared_ptr<BarFactoryItem> const &i) { return *i == item; });
+      [item](const std::shared_ptr<BarFactoryItem> &i) { return *i == item; });
 
   if (it != list.end()) {
     list.erase(it);
@@ -43,7 +43,7 @@ void BarFactory::clear() {
   m_reminder_lists.clear();
 }
 
-void BarFactory::on_data(const Event::Pointer &e) {
+void BarFactory::on_event(const Event::Pointer &e) {
   auto tick = event_cast<ETick>(e);
   auto items = m_item_lists[tick->instrument_id()]; // TOOD: if not exist, map
                                                     // would be create one

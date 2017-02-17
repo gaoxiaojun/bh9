@@ -23,17 +23,16 @@ Event::Pointer EventBus::dequeue() {
     while (true) {
       // 1. check local clock timer
       if (!m_local_clock_queue.empty()) {
-        auto reminder = m_local_clock_queue.top();
+        auto reminder = *m_local_clock_queue.begin(); //top();
         if (reminder->time() < time()) {
-          m_local_clock_queue.pop();
+          m_local_clock_queue.erase(m_local_clock_queue.begin());//.pop();
           return reminder;
         }
       }
-      // 2. check exchange clock timer
-      // 3. check has event
+      // 2. check has event
       if (!m_queue.empty()) {
-        auto event = m_queue.top();
-        m_queue.pop();
+        auto event = *m_queue.begin(); //top();
+        m_queue.erase(m_queue.begin());//.pop();
         return event;
       } else // return nullptr to mark no event in queue
         return nullptr;
@@ -42,11 +41,11 @@ Event::Pointer EventBus::dequeue() {
   else { // simulation mode
     while (true) {
       // 1.update local time
-      auto event = m_queue.empty() ? nullptr : m_queue.top();
+      auto event = m_queue.empty() ? nullptr : *m_queue.begin(); //top();
       if (event && is_market_event(event->type())) {
         if (event->time() < m_time) {
           show_warning(event->type(), event->time(), time());
-          m_queue.pop(); // discard the event
+          m_queue.erase(m_queue.begin());//.pop(); // discard the event
           continue;
         } else {
           m_time = event->time();
@@ -54,16 +53,15 @@ Event::Pointer EventBus::dequeue() {
       }
       // 2. check local clock timer
       if (!m_local_clock_queue.empty() && event) {
-        auto reminder = m_local_clock_queue.top();
+        auto reminder = *m_local_clock_queue.begin(); //top();
         if (reminder->time() < event->time()) {
-          m_local_clock_queue.pop();
+          m_local_clock_queue.erase(m_local_clock_queue.begin());//.pop();
           return reminder;
         }
       }
-      // 3. check exchange clock timer;
-      // 4.
+      // 3.
       if (event)
-        m_queue.pop();
+        m_queue.erase(m_queue.begin());//.pop();
       return event;
     }
   }
@@ -83,14 +81,14 @@ ptime EventBus::time() const {
 
 void EventBus::enqueue(const Event::Pointer &e) {
   if (e->type() != Event::Type::kReminder)
-    m_queue.push(e);
+    m_queue.insert(e); //push(e);
   else
-    m_local_clock_queue.push(e);
+    m_local_clock_queue.insert(e); //push(e);
 }
 
 void EventBus::enqueue(Event::Pointer &&e) {
   if (e->type() != Event::Type::kReminder)
-    m_queue.push(e);
-  else
-    m_local_clock_queue.push(e);
+      m_queue.insert(e); //push(e);
+    else
+      m_local_clock_queue.insert(e); //push(e);
 }

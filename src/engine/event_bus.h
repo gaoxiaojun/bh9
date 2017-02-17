@@ -14,7 +14,7 @@ public:
   EReminder(ptime time, const ReminderCallback &callback)
       : Event(Event::Type::kReminder, time), m_callback(callback) {}
 
-  void operator()() { m_callback(time()); }
+  void operator()() { if(m_callback) m_callback(time()); }
 
 private:
   ReminderCallback m_callback;

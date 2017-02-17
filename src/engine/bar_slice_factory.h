@@ -2,7 +2,7 @@
 #define BAR_SLICE_FACTORY_H
 
 #include "event.h"
-#include "bar.h"
+#include "bar2.h"
 
 namespace h9 {
 
