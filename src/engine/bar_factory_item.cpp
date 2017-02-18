@@ -10,12 +10,17 @@ BarFactoryItem::BarFactoryItem(InstrumentId iid, Bar::Type barType,
     : m_pid(pid), m_iid(iid), m_type(barType), m_input(barInput),
       m_size(barSize), m_session_enable(false), m_bar(nullptr) {}
 
-BarFactoryItem(InstrumentId iid, Bar::Type barType, long barSize,
-               Bar::Input barInput, time_duration session1,
-               time_duration session2, ProviderId pid = -1)
+BarFactoryItem::BarFactoryItem(InstrumentId iid, Bar::Type barType, long barSize,
+               BarInput barInput, time_duration session1,
+               time_duration session2, ProviderId pid)
     : m_pid(pid), m_iid(iid), m_type(barType), m_input(barInput),
       m_size(barSize), m_session_enable(true), m_session1(session1),
       m_session2(session2), m_bar(nullptr) {}
+
+BarFactoryItem::~BarFactoryItem()
+{
+
+}
 
 void BarFactoryItem::process(const Event::Pointer &e) {
   auto tick = event_cast<ETick>(e);
@@ -25,10 +30,10 @@ void BarFactoryItem::process(const Event::Pointer &e) {
   if (!in_session(tick->time()))
     return;
 
-  on_event(e);
+  on_tick(e);
 }
 
-void BarFactoryItem::on_event(const Event::Pointer &e) {
+void BarFactoryItem::on_tick(const Event::Pointer &e) {
   auto tick = event_cast<ETick>(e);
   if (!m_bar) {
     double price = tick->price();
@@ -36,7 +41,7 @@ void BarFactoryItem::on_event(const Event::Pointer &e) {
                                   tick->instrument_id(), m_type, m_size, price,
                                   price, price, price, tick->volume());
     m_bar->status = Bar::Status::kOpen;
-    m_factory.framework().event_server().on_event(m_bar);
+    //m_factory.framework().event_server().on_event(m_bar);
   } else {
     if (tick->price() > m_bar->high)
       m_bar->high = tick->price();
@@ -45,14 +50,14 @@ void BarFactoryItem::on_event(const Event::Pointer &e) {
       m_bar->low = tick->price();
 
     m_bar->close = tick->price();
-    m_bar->volume += tick->size();
+    m_bar->volume += tick->volume();
     m_bar->set_time(get_bar_time(e)); // Q: this update EBar time, not bar
-    ++m_bar->N;
+    ++m_bar->tick_count;
   }
 }
 
 bool BarFactoryItem::in_session(ptime time) {
-  if (m_session_enbale) {
+  if (m_session_enable) {
     auto td = time.time_of_day();
     if (td < m_session1 || td > m_session2)
       return false;
@@ -61,12 +66,13 @@ bool BarFactoryItem::in_session(ptime time) {
 }
 
 bool BarFactoryItem::add_reminder(ptime time) {
-  m_factory->add_reminder(*this, ptime);
+    std::cout << "add reminder:" << time << std::endl;
+  m_factory->add_reminder(time, shared_from_this());
 }
 
 void BarFactoryItem::emit_bar() {
   m_bar->status = Bar::Status::kClose;
+  std::cout << m_bar->open << " "<< m_bar->high << " "<< m_bar->low   << " "<< m_bar->close << std::endl;
   // m_factory->framework()->event_server()->on_event(m_bar);
-  m_bar.reset();
+  m_bar = nullptr;
 }
-

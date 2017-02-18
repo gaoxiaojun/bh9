@@ -2,6 +2,7 @@
 #define EVENT_H
 
 #include "common.h"
+#include <memory>
 #include <boost/checked_delete.hpp>
 #include <boost/operators.hpp>
 
@@ -114,8 +115,13 @@ public:
     kOnSimulatorProgress = 230,
   };
 
+  using Source = std::int16_t;
+
 public:
-  Event(Type type, ptime time) : m_time(time), m_type(type) {}
+  explicit Event(Type type, ptime time = clock::local_time(),
+                 Source source = -1)
+      : m_time(time), m_type(type), m_source(source) {}
+
   virtual ~Event() {}
 
 public:
@@ -124,6 +130,8 @@ public:
   inline ptime time() const { return m_time; }
   void set_time(ptime time) { m_time = time; }
 
+  Source source() const { return m_source; }
+
   friend inline bool operator<(const Event &lhs, const Event &rhs) {
     return lhs.m_time < rhs.m_time;
   }
@@ -131,6 +139,7 @@ public:
 private:
   ptime m_time;
   Type m_type;
+  Source m_source;
 };
 
 template <class T, class... Ts> Event::Pointer make_event(Ts &&... xs) {
@@ -138,7 +147,7 @@ template <class T, class... Ts> Event::Pointer make_event(Ts &&... xs) {
       std::make_shared<T>(std::forward<Ts>(xs)...));
 }
 
-template <class T> std::shared_ptr<T> event_cast(const Event::Pointer& e) {
+template <class T> std::shared_ptr<T> event_cast(const Event::Pointer &e) {
   return std::static_pointer_cast<T>(e);
 }
 

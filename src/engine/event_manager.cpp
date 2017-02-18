@@ -48,6 +48,11 @@ void EventManager::step(Event::Type type)
     on_event(e);
 }
 
+void EventManager::clear()
+{
+    m_bar_factory.clear();
+}
+
 void EventManager::on_event(const Event::Pointer &e)
 {
 
@@ -55,17 +60,24 @@ void EventManager::on_event(const Event::Pointer &e)
 
 void EventManager::on_bid(const Event::Pointer &e)
 {
-
+    auto bid = event_cast<EBid>(e);
+                //SyncLocalClockWithDataObject(bid);
+                //SyncExchangeClockWithTick(bid, nameof(OnBid));
+    m_bar_factory.on_tick(e);
+                /*this.framework.DataManager.OnBid(bid);
+                this.framework.InstrumentManager.GetById(bid.InstrumentId).Bid = bid;
+                this.framework.ProviderManager.ExecutionSimulator.OnBid(bid);
+                this.framework.StrategyManager.OnBid(bid);*/
 }
 
 void EventManager::on_ask(const Event::Pointer &e)
 {
-
+m_bar_factory.on_tick(e);
 }
 
 void EventManager::on_trade(const Event::Pointer &e)
 {
-
+m_bar_factory.on_tick(e);
 }
 
 void EventManager::on_queote(const Event::Pointer &e)

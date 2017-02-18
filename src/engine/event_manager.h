@@ -29,7 +29,7 @@ public:
   void pause(ptime time);
   void resume();
   void step(Event::Type type = Event::Type::kEvent);
-
+  void clear();
 protected:
   // event process entry
   void on_event(const Event::Pointer &e);

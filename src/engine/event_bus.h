@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "event.h"
+#include "priority_queue.h"
 
 namespace h9 {
 class Framework;
@@ -40,6 +41,9 @@ public:
   void set_reminder_order(ReminderOrder v) { m_reminder_order = v; }
 
   bool empty() const { return m_queue.empty() && m_local_clock_queue.empty(); }
+
+  std::size_t queue_size() const { return m_queue.size(); }
+  std::size_t reminder_size() const { return m_local_clock_queue.size(); }
 
   void enqueue(const Event::Pointer &e);
   void enqueue(Event::Pointer &&e);

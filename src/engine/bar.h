@@ -17,19 +17,11 @@ public:
 public:
   Bar(ptime open_time, ptime close_time, InstrumentId iid, Bar::Type type,
       long size, double open = 0.0, double high = 0.0, double low = 0.0,
-      double close = 0.0, long volume = 0, long openInt = 0)
-      : open_time(opent_time), close_time(close_time), iid(iid),
-        type(type), size(size), open(open), high(high), low(low),
-        close(close), vol(volume), open_interest(openInt),
-        status(open_time == close_time ? Bar::Status::kOpen : Bar::Status::kClose) {
-  }
+      double close = 0.0, long volume = 0, long openInt = 0);
 
 public:
   ptime time() const { return close_time; }
-  void set_time(ptime time) {
-    time = time;
-    close_time = time;
-  }
+  void set_time(ptime time);
 
 public:
   double range() const { return high - low; }
@@ -55,13 +47,13 @@ public:
   double close;
   long volume;
   long open_interest;
-  long N;
+  long tick_count;
   Status status;
 };
 
 class EBar : public Event {
 public:
-    Bar bar;
+  Bar bar;
 };
 
 } // namespace h9

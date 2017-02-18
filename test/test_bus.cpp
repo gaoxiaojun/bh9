@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "../src/engine/event_bus.h"
-#include "../src/engine/market_events.h"
+#include "event_bus.h"
+#include "market_events.h"
 #include <boost/random.hpp>
 #include <boost/random/random_device.hpp>
 

@@ -61,7 +61,7 @@ public:
     this.v2 = v2;
     this.v3 = v3;
   }
-  Instrument(Instrument instrument) { throw new NotImplementedException(); }
+  Instrument(Instrument instrument) { throw NotImplementedException(); }
 
   Instrument(Type type, std::string symbol, std::string description = "",
              std::uint8_t currencyId = 148 /* USD */)

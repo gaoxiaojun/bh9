@@ -1,70 +1,133 @@
 #include "bar_factory.h"
+#include "bar_factory_items/range_item.h"
+#include "bar_factory_items/session_item.h"
+#include "bar_factory_items/tick_item.h"
+#include "bar_factory_items/time_item.h"
+#include "bar_factory_items/volume_item.h"
+#include "event_bus.h"
 #include "market_events.h"
+#include "util.h"
 #include <algorithm>
+#include <functional>
 #include <iostream>
+#include <memory>
 
 using namespace h9;
 
-void BarFactory::add(const BarFactoryItem &item) {
-  if (item.factory() != nullptr)
-    throw new std::logic_error(
-        "BarFactoryItem is already added to another BarFactory instance.");
-
-  item.set_factory(this);
-
-  auto &list = m_item_lists[item.instrument_id()];
-
-  auto it = std::find_if(
-      list.begin(), list.end(),
-      [item](const std::shared_ptr<BarFactoryItem> &i) { return *i == item; });
-
-  if (it == list.end())
-    list.add(item);
+template <class T, class... Ts>
+std::shared_ptr<BarFactoryItem> make_bar_factory_item(Ts &&... xs) {
+  return ::std::static_pointer_cast<BarFactoryItem>(
+      std::make_shared<T>(std::forward<Ts>(xs)...));
 }
 
-void BarFactory::remove(const BarFactoryItem &item) {
-  auto mit = m_item_lists.find(item.instrument_id());
-  if (mit == m_item_lists.end())
-    return;
-  auto list = *mit;
+BarFactory::BarFactory(EventBus *bus) : m_bus(bus) {}
 
-  auto it = std::find_if(
-      list.begin(), list.end(),
-      [item](const std::shared_ptr<BarFactoryItem> &i) { return *i == item; });
+void BarFactory::add(InstrumentId iid, Bar::Type barType, long barSize,
+                     BarInput barInput) {
+  BarFactoryItemPtr item;
+  switch (barType) {
+  case Bar::Type::kTime:
+    item = make_bar_factory_item<TimeBarFactoryItem>(iid, barSize, barInput);
+    break;
+  case Bar::Type::kTick:
+    item = make_bar_factory_item<TickBarFactoryItem>(iid, barSize, barInput);
+    break;
+  case Bar::Type::kVolume:
+    item = make_bar_factory_item<VolumeBarFactoryItem>(iid, barSize, barInput);
+    break;
+  case Bar::Type::kRange:
+    item = make_bar_factory_item<RangeBarFactoryItem>(iid, barSize, barInput);
+    break;
+  case Bar::Type::kSession:
+    throw std::logic_error("BarFactory::Add Can not create "
+                           "SessionBarFactoryItem without session "
+                           "parameters");
+    break;
+  default:
+    throw std::logic_error("Unknown bar type -" + bar_type_to_string(barType));
+  }
+  add(item);
+}
 
-  if (it != list.end()) {
-    list.erase(it);
-  } else
-    std::cout << "Warnging: remove BarFactoryItem not found" << std::endl;
+void BarFactory::add(InstrumentId iid, Bar::Type barType, long barSize,
+                     BarInput barInput, time_duration session1,
+                     time_duration session2) {
+  BarFactoryItemPtr item;
+  switch (barType) {
+  case Bar::Type::kTime:
+    item = make_bar_factory_item<TimeBarFactoryItem>(iid, barSize, barInput,
+                                                     session1, session2);
+    break;
+  case Bar::Type::kTick:
+    item = make_bar_factory_item<TickBarFactoryItem>(iid, barSize, barInput,
+                                                     session1, session2);
+    break;
+  case Bar::Type::kVolume:
+    item = make_bar_factory_item<VolumeBarFactoryItem>(iid, barSize, barInput,
+                                                       session1, session2);
+    break;
+  case Bar::Type::kRange:
+    item = make_bar_factory_item<RangeBarFactoryItem>(iid, barSize, barInput,
+                                                      session1, session2);
+    break;
+  case Bar::Type::kSession:
+    item = make_bar_factory_item<SessionBarFactoryItem>(iid, barInput, session1,
+                                                        session2);
+    break;
+  default:
+    throw std::logic_error("Unknown bar type -" + bar_type_to_string(barType));
+  }
+  add(item);
+}
+
+void BarFactory::add(const BarFactoryItemPtr &item) {
+  if (item->m_factory != nullptr)
+    throw std::logic_error(
+        "BarFactoryItem is already added to another BarFactory instance.");
+
+  item->m_factory = this;
+
+  m_item_map.emplace(item->instrument_id(), item);
+}
+
+void BarFactory::remove(const BarFactoryItemPtr &item) {
+  auto range = m_item_map.equal_range(item->instrument_id());
+  for (auto& it = range.first; it != range.second; ++it) {
+    auto &sp_item = (*it).second;
+    if (*sp_item == *item) {
+      m_item_map.erase(it);
+      return;
+    }
+  }
+
+  std::cout << "Warnging: remove BarFactoryItem not found" << std::endl;
 }
 
 void BarFactory::clear() {
-  m_item_lists.clear();
-  m_reminder_lists.clear();
+  m_item_map.clear();
+  m_reminder_map.clear();
 }
 
-void BarFactory::on_event(const Event::Pointer &e) {
-  auto tick = event_cast<ETick>(e);
-  auto items = m_item_lists[tick->instrument_id()]; // TOOD: if not exist, map
-                                                    // would be create one
-
-  int i = 0;
-  while (i < items.cout()) {
-    auto item = items[i];
-    switch (item.input()) {
-    case Bar::Input::kTrade:
-      if (tick->type() == Event::Type::kTrade)
-        process(e);
+void BarFactory::on_tick(const Event::Pointer &e) {
+  const auto tick = event_cast<ETick>(e);
+  auto range = m_item_map.equal_range(tick->instrument_id());
+  //std::cout << "factory:on_tick:" << (range.first == range.second) << std::endl;
+  for (auto& it = range.first; it != range.second; ++it) {
+    auto &item = (*it).second; // value
+    switch (item->m_input) {
+    case BarInput::kTrade:
+      if (tick->type() != Event::Type::kTrade)
+        continue;
       break;
-    case Bar::Input::kBid:
-      if (tick->type() == Event::Type::kBid)
-        process(e);
+    case BarInput::kBid:
+      if (tick->type() != Event::Type::kBid)
+        continue;
       break;
-    case Bar::Input::kAsk:
-      if (tick->type() == Event::Type::kAsk)
-        process(e);
+    case BarInput::kAsk:
+      if (tick->type() != Event::Type::kAsk)
+        continue;
       break;
-    case Bar::Input::kMiddle:
+    case BarInput::kMiddle:
       // TODO
       switch (tick->type()) {
       case Event::Type::kBid:
@@ -73,21 +136,64 @@ void BarFactory::on_event(const Event::Pointer &e) {
       case Event::Type::kAsk:
         break;
       case Event::Type::kTrade:
-        break;
+        continue;
       }
+      // if (e->type() == Event::Type::kAsk)
+      //      return;
       break;
-    case Bar::Input::kTick:
+    case BarInput::kTick:
       break;
-    case Bar::Input::kBidAsk:
-      // TODO:
+    case BarInput::kBidAsk:
+      if (tick->type() == Event::Type::kTrade)
+        return;
       break;
     default:
-      std::cout << "BarFactory::OnData BarInput is not supported :"
-                << item.input() << std::endl;
+      throw std::logic_error("BarFactory::OnData BarInput is not supported :" +
+                             bar_input_to_string(item->m_input));
+      continue;
     }
+    item->process(e);
   }
 }
 
-bool BarFactory::add_reminder(const BarFactoryItem &item, ptime time) {}
+void BarFactory::show()
+{
+    std::cout << "item_map: ";
+    for(auto& it : m_item_map) {
+        std::cout << "key:" << it.first << " value:" << it.second->instrument_id() << ":" << it.second->provider_id()<< std::endl;
+    }
+    std::cout << std::endl;
+}
 
-void BarFactory::on_reminder(ptime time, const BFItemPtr &item) {}
+bool BarFactory::add_reminder(ptime time, const BarFactoryItemPtr &item) {
+  bool is_exist = true;
+  auto mit = m_reminder_map.find(time);
+  if (mit == m_reminder_map.end())
+    is_exist = false;
+
+  m_reminder_map.emplace(time, item);
+
+  if (!is_exist) {
+    Event::Pointer reminder = make_event<EReminder>(
+        time, std::bind(&BarFactory::on_reminder, this, std::placeholders::_1));
+    m_bus->enqueue(reminder);
+  }
+}
+
+void BarFactory::on_reminder(ptime time) {
+
+  auto range = m_reminder_map.equal_range(time);
+ std::cout << "on reminder in bar factory:" << (range.first == range.second) << std::endl;
+  if (range.first == range.second)
+    throw std::logic_error(
+        "BarFactory::on_reminder, cannot found reminder_list");
+
+  try {
+    for (auto& it = range.first; it != range.second; ++it) {
+      auto &item = (*it).second;
+      item->on_reminder(time);
+    }
+  } catch (...) {
+    m_reminder_map.erase(time);
+  }
+}
