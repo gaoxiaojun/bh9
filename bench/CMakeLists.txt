@@ -9,6 +9,6 @@ file(GLOB_RECURSE TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
           ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_executable(h9_bench ${TEST_SRCS})
-target_link_libraries(h9_bench )
+target_link_libraries(h9_bench benchmark)
 add_test(NAME h9_unit_test COMMAND h9_bench)
 
