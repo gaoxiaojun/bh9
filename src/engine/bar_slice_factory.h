@@ -3,8 +3,11 @@
 
 #include "bar.h"
 #include "event.h"
+#include <unordered_map>
 
 namespace h9 {
+
+class Framework;
 
 class EBarSlice : public Event {
 public:
@@ -20,8 +23,7 @@ private:
   long m_size;
 };
 
-class BarSliceItem {
-private:
+struct BarSliceItem {
   std::vector<Bar> m_bars;
   ptime m_close_time;
   int m_bar_count;
@@ -29,16 +31,18 @@ private:
 
 class BarSliceFactory {
 public:
-  BarSliceFactory();
+  explicit BarSliceFactory(Framework *framework) : m_framework(framework) {}
 
-  void clear();
+  void clear() { m_items.clear(); }
 
 protected:
   void on_bar(const Bar &bar);
+
   bool on_bar_open(const Bar &bar);
 
 private:
-  std::vector<BarSliceItem> m_items;
+  Framework *m_framework;
+  std::unordered_map<long, BarSliceItem> m_items;
 };
 
 } // namespace h9

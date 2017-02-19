@@ -1,24 +1,58 @@
 #ifndef FRAMEWORK_H
 #define FRAMEWORK_H
 
-#include "event_manager.h"
 #include "event_bus.h"
+#include "event_manager.h"
+#include "event_server.h"
 
 namespace h9 {
+class Configuration;
+class AccountDataManager;
+class StreamerManager;
+class DataFileManager;
+class DataManager;
+class EventManager;
+class EventLoggerManager;
+class SubscriptionManager;
+class ScenarioManager;
+class GroupManager;
+class GroupDispatcher;
+class InstrumentManager;
+class ICurrencyConverter;
+class IDataProvider;
+class IExecutionProvider;
+class InstrumentServer;
+class DataServer;
+class OrderServer;
+class PortfolioServer;
+class OrderManager;
+class ProviderManager;
+class StatisticsManager;
+class StrategyManager;
+class UserServer;
+class UserManager;
+class EventServer;
+class PortfolioManager;
+class OutputManager;
+class EventBus;
 
-class Framework
-{
+
+class Framework {
 public:
-    Framework();
+  enum class Mode { kSimulation, kRealtime };
 
 public:
-    EventManager& event_manager() { return m_event_manager; }
-    EventBus& event_bus() { return m_event_bus; }
+  Framework();
+
+public:
+  EventBus &event_bus() { return m_bus; }
+  EventManager &event_manager() { return m_event_manager; }
+  EventServer &event_server() { return m_event_server; }
 
 private:
-    EventBus m_bus;
-    EventManager m_event_manager;
-
+  EventBus m_bus;
+  EventManager m_event_manager;
+  EventServer m_event_server;
 };
 
 } // namespace h9

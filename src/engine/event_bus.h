@@ -25,7 +25,7 @@ enum class ReminderOrder { kBefore, kAfter };
 
 class EventBus : private noncopyable {
 public:
-  enum class Mode { kRealtime, kSimulation };
+  enum class Mode { kSimulation, kRealtime };
 
 public:
   explicit EventBus();

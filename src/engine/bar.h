@@ -37,9 +37,10 @@ public:
 public:
   ptime open_time;
   ptime close_time;
-  ProviderId pid;
   InstrumentId iid;
+  ProviderId pid;
   Type type;
+  Status status;
   long size;
   double open;
   double high;
@@ -48,7 +49,6 @@ public:
   long volume;
   long open_interest;
   long tick_count;
-  Status status;
 };
 
 class EBar : public Event {

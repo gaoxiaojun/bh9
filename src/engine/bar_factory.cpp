@@ -1,9 +1,9 @@
 #include "bar_factory.h"
-#include "bar_factory_items/range_item.h"
-#include "bar_factory_items/session_item.h"
-#include "bar_factory_items/tick_item.h"
-#include "bar_factory_items/time_item.h"
-#include "bar_factory_items/volume_item.h"
+#include "bar_items/range_item.h"
+#include "bar_items/session_item.h"
+#include "bar_items/tick_item.h"
+#include "bar_items/time_item.h"
+#include "bar_items/volume_item.h"
 #include "event_bus.h"
 #include "market_events.h"
 #include "util.h"
@@ -156,14 +156,14 @@ void BarFactory::on_tick(const Event::Pointer &e) {
   }
 }
 
-void BarFactory::show()
+/* void BarFactory::show()
 {
     std::cout << "item_map: ";
     for(auto& it : m_item_map) {
         std::cout << "key:" << it.first << " value:" << it.second->instrument_id() << ":" << it.second->provider_id()<< std::endl;
     }
     std::cout << std::endl;
-}
+}*/
 
 bool BarFactory::add_reminder(ptime time, const BarFactoryItemPtr &item) {
   bool is_exist = true;

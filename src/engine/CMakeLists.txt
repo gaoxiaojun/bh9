@@ -12,12 +12,14 @@ set(ENGINE_HEADER
     bar.h
     bar_factory.h
     bar_factory_item.h
-    bar_factory_items/range_item.h
-    bar_factory_items/session_item.h
-    bar_factory_items/tick_item.h
-    bar_factory_items/time_item.h
-    bar_factory_items/volume_item.h
+    bar_items/range_item.h
+    bar_items/session_item.h
+    bar_items/tick_item.h
+    bar_items/time_item.h
+    bar_items/volume_item.h
     util.h
+
+    bar_slice_factory.h
 )
 set(ENGINE_SRC
   bar.cpp
@@ -25,12 +27,13 @@ set(ENGINE_SRC
   event_bus.cpp
   bar_factory.cpp
   bar_factory_item.cpp
-  bar_factory_items/range_item.cpp
-  bar_factory_items/session_item.cpp
-  bar_factory_items/tick_item.cpp
-  bar_factory_items/time_item.cpp
-  bar_factory_items/volume_item.cpp
+  bar_items/range_item.cpp
+  bar_items/session_item.cpp
+  bar_items/tick_item.cpp
+  bar_items/time_item.cpp
+  bar_items/volume_item.cpp
   util.cpp
+  bar_slice_factory.cpp
 )
 
 add_library(engine STATIC  ${ENGINE_HEADER} ${ENGINE_SRC})

@@ -72,12 +72,13 @@ void EventManager::on_bid(const Event::Pointer &e)
 
 void EventManager::on_ask(const Event::Pointer &e)
 {
-m_bar_factory.on_tick(e);
+    //auto ask = event_cast<EAsk>(e);
+    m_bar_factory.on_tick(e);
 }
 
 void EventManager::on_trade(const Event::Pointer &e)
 {
-m_bar_factory.on_tick(e);
+    m_bar_factory.on_tick(e);
 }
 
 void EventManager::on_queote(const Event::Pointer &e)
@@ -222,7 +223,10 @@ void EventManager::on_execution_report(const Event::Pointer &e)
 
 void EventManager::on_reminder(const Event::Pointer &e)
 {
-
+    // if ((reminder.Clock.Type == ClockType.Local && reminder.Clock.Mode == ClockMode.Simulation) || reminder.Clock.Type == ClockType.Exchange)
+    // reminder.Clock.DateTime = e.dateTime;
+    auto r = event_cast<EReminder>(e);
+    r->operator()();
 }
 
 void EventManager::on_provider_error(const Event::Pointer &e)
